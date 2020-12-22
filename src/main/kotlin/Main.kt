@@ -1,3 +1,6 @@
+import config.ConfigParser
+
 fun main() {
-    MonitorService.start()
+    val config = ConfigParser.createConfig()
+    MonitorService.start(config)
 }

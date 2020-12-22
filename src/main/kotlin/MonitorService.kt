@@ -3,11 +3,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.sun.xml.internal.fastinfoset.util.StringArray
+import com.typesafe.config.Config
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.omg.CORBA.Environment
+import sun.misc.ObjectInputFilter
 import java.io.File
 import java.net.URL
 import java.sql.DriverManager
@@ -19,27 +22,25 @@ object MonitorService{
     private val f = JsonFactory()
     private val mapper: ObjectMapper = ObjectMapper(f).registerModule(KotlinModule())
 
-    fun start()= runBlocking {
-        var monitorConf : MonitorConf? = null
+    fun start(config : Config)= runBlocking {
         try{
-            monitorConf = mapper.readValue(File("monitor.json"))
-            monitorConf!!.endpoints.forEach {
-                endpointToCheck ->  checkIfDbIfReachable(endpointToCheck.dbname, endpointToCheck.endpoint)
+            config.getConfigList("databases").forEach {
+                endpointToCheck ->  checkIfDbIfReachable(endpointToCheck.getString("dbname"), endpointToCheck.getString("endpoint"))
             }
         }
         catch (e: Exception){
-            sendErrorMessageToSlack(e, monitorConf!!)
+            sendErrorMessageToSlack(e, config)
         }
     }
 
-    private fun sendErrorMessageToSlack(e : Exception, monitorConf : MonitorConf){
+    private fun sendErrorMessageToSlack(e : Exception, config : Config){
 
-        val url = URL(monitorConf.slackbridge)
+        val url = URL(config.getString("slackbridge"))
         val headers : Map<String, String> = mapOf(
             Pair("Content-type","application/json")
         )
 
-        NetworkHelper.getResponse(url, headers, monitorConf.errormessage + " " +  e.message)
+        NetworkHelper.getResponse(url, headers, config.getString("errormessage") + " " +  e.message)
         throw e
     }
 
