@@ -18,9 +18,9 @@ object MonitorService{
     private val f = JsonFactory()
     private val mapper: ObjectMapper = ObjectMapper(f).registerModule(KotlinModule())
 
-    fun start(config : Config)= runBlocking {
+    fun start(config : Config, connection : Connection)= runBlocking {
         try{
-            DriverManager.getConnection(config.getString("endpoint")).use {
+            connection.use {
                 config.getConfigList("databases").forEach {
                         endpointToCheck ->  checkIfDbIfReachable(endpointToCheck.getString("dblabel"), endpointToCheck.getString("dbname"), it)
                 }
