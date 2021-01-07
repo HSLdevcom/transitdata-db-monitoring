@@ -1,1 +1,1 @@
-data class EndpointToCheck(val dbname: String, val endpoint: String)
+data class EndpointToCheck(val dbname: String, val dblabel: String)

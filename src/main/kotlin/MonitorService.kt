@@ -13,7 +13,9 @@ import org.omg.CORBA.Environment
 import sun.misc.ObjectInputFilter
 import java.io.File
 import java.net.URL
+import java.sql.Connection
 import java.sql.DriverManager
+import java.sql.Statement
 import kotlin.properties.Delegates
 
 
@@ -24,8 +26,10 @@ object MonitorService{
 
     fun start(config : Config)= runBlocking {
         try{
-            config.getConfigList("databases").forEach {
-                endpointToCheck ->  checkIfDbIfReachable(endpointToCheck.getString("dbname"), endpointToCheck.getString("endpoint"))
+            DriverManager.getConnection(config.getString("endpoint")).use {
+                config.getConfigList("databases").forEach {
+                        endpointToCheck ->  checkIfDbIfReachable(endpointToCheck.getString("dblabel"), endpointToCheck.getString("dbname"), it)
+                }
             }
         }
         catch (e: Exception){
@@ -47,14 +51,15 @@ object MonitorService{
     /**
      * Throws an exception if can't reach the db
      */
-    private suspend fun checkIfDbIfReachable(dbname : String, url : String){
+    private suspend fun checkIfDbIfReachable(dblabel : String, dbname : String, connection : Connection){
         withContext(Dispatchers.IO) {
             try {
-                val connection = DriverManager.getConnection(url)
+                val stmt: Statement = connection.createStatement()
+                stmt.execute("use [$dbname]")
+                stmt.close()
                 assert(connection.isValid(5000))
-                connection.close()
             } catch (e: Exception) {
-                throw Exception("Connection to DB $dbname failed")
+                throw Exception("Connection to DB $dblabel failed")
             }
         }
     }
