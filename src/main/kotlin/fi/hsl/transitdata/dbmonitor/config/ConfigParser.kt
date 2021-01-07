@@ -1,4 +1,4 @@
-package config
+package fi.hsl.transitdata.dbmonitor.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException

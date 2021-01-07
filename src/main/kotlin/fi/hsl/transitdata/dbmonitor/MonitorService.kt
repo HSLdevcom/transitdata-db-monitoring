@@ -1,22 +1,16 @@
+package fi.hsl.transitdata.dbmonitor
+
 import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.sun.xml.internal.fastinfoset.util.StringArray
 import com.typesafe.config.Config
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.omg.CORBA.Environment
-import sun.misc.ObjectInputFilter
-import java.io.File
 import java.net.URL
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.Statement
-import kotlin.properties.Delegates
 
 
 object MonitorService{
@@ -44,7 +38,7 @@ object MonitorService{
             Pair("Content-type","application/json")
         )
 
-        NetworkHelper.getResponse(url, headers, config.getString("errormessage") + " " +  e.message)
+        NetworkHelper.getResponse(url, headers, config.getString("errormessage") + " " + e.message)
         throw e
     }
 

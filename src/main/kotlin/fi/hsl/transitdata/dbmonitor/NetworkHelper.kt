@@ -1,9 +1,9 @@
+package fi.hsl.transitdata.dbmonitor
+
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
 import java.io.InputStream
 import java.net.URL
-import java.time.LocalDateTime
 
 
 object NetworkHelper {
