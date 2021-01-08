@@ -1,15 +1,31 @@
 package fi.hsl.transitdata.dbmonitor
 
 import fi.hsl.transitdata.dbmonitor.config.ConfigParser
+import mu.KotlinLogging
 import java.io.File
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.SQLException
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
+private val log = KotlinLogging.logger {}
 fun main() {
+    startScheduler()
+}
+
+fun startScheduler(){
+    val scheduler = Executors.newScheduledThreadPool(1)
     val config = ConfigParser.createConfig()
-    MonitorService.start(config, createPubtransConnection())
+    scheduler.scheduleWithFixedDelay(Runnable {
+        try{
+            MonitorService.start(config, createPubtransConnection())
+            log.info("Db connection check complete")
+        }
+        catch(e : Exception){
+            log.error("Error while checking the databases:",e)
+        }
+    }, 0 ,5 , TimeUnit.MINUTES)
 }
 
 @Throws(Exception::class)
