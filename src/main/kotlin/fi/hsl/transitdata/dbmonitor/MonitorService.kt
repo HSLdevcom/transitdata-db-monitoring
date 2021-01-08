@@ -28,6 +28,7 @@ object MonitorService{
             }
         }
         catch (e: Exception){
+            log.error ("Failed to use the connection to the db", e)
             sendErrorMessageToSlack(e, config)
         }
     }
